@@ -810,6 +810,7 @@ module VagrantPlugins
                       xml.PrimaryNetworkConnectionIndex '0'
                       xml.NetworkConnection('network' => network_config[:name]) {
                         xml.NetworkConnectionIndex '0'
+                        xml.IpAddress network_config[:ip] unless network_config[:ip].nil?  
                         xml.IsConnected 'true'
                         xml.IpAddressAllocationMode(network_config[:ip_allocation_mode] || 'POOL')
                     }
@@ -873,6 +874,7 @@ module VagrantPlugins
                       xml.PrimaryNetworkConnectionIndex '0'
                       xml.NetworkConnection('network' => network_config[:name]) {
                         xml.NetworkConnectionIndex '0'
+                        xml.IpAddress network_config[:ip] unless network_config[:ip].nil?
                         xml.IsConnected 'true'
                         xml.IpAddressAllocationMode(network_config[:ip_allocation_mode] || 'POOL')
                     }
