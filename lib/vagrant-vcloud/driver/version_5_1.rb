@@ -734,7 +734,7 @@ module VagrantPlugins
             "VApp Task[operationName='vdcInstantiateVapp']"
           ).first
 
-          task_id = URI(task['href']).path.gsub("/api/task/", '')
+          task_id = URI(task['href']).path.gsub('/api/task/', '')
 
           { :vapp_id => vapp_id, :task_id => task_id }
         end
