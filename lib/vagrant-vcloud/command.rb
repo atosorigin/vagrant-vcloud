@@ -44,6 +44,18 @@ module VagrantPlugins
         puts table
       end
 
+      def command_halt_vapp(cfg, vapp_id)
+        puts "Powering off vApp..."
+        cnx = cfg.vcloud_cnx.driver
+        # Poweroff vApp
+        vapp_stop_task = cnx.poweroff_vapp(vapp_id)
+        vapp_stop_wait = cnx.wait_task_completion(vapp_stop_task)
+
+        unless vapp_stop_wait[:errormsg].nil?
+          fail Errors::StopVAppError, :message => vapp_stop_wait[:errormsg]
+        end
+      end
+
       def command_vcloud_network(cfg, vapp_id, ssh_host)
         # FIXME: this needs to be fixed to accomodate the bridged scenario
         # potentially showing only the assigned IPs in the VMs
@@ -216,6 +228,13 @@ module VagrantPlugins
           end
 
           o.on(
+            '--halt-vapp',
+            'Halts the whole vApp including all VMs'
+          ) do |f|
+            options[:halt_vapp] = true
+          end
+
+          o.on(
             '-r',
             '--redeploy-edge-gw',
             'Redeploy the vCloud Director Edge Gateway'
@@ -240,6 +259,7 @@ module VagrantPlugins
         vapp_id = nil
         cfg = nil
 
+        
         # Go through the vagrant machines
         with_target_vms(@argv) do |machine|
 
@@ -255,7 +275,9 @@ module VagrantPlugins
           end
 
           # Force reloads on objects by fetching the ssh_info
-          machine.provider.ssh_info
+          unless options[:halt_vapp]
+            machine.provider.ssh_info
+          end
 
           # populate cfg & vApp Id for later use.
           cfg = machine.provider_config
@@ -269,6 +291,8 @@ module VagrantPlugins
           case key
           when :status
             command_vcloud_status(cfg, vapp_id)
+          when :halt_vapp
+            command_halt_vapp(cfg, vapp_id)
           when :network
             command_vcloud_network(cfg, vapp_id, ssh_host)
           when :redeploy_edge_gw
