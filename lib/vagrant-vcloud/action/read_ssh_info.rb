@@ -19,7 +19,7 @@ module VagrantPlugins
         def check_for_port(ip, port, port_name)
           @logger.debug("Checking #{port_name} (#{ip}:#{port})...")
           begin
-            Timeout::timeout(1) do
+            Timeout::timeout(3) do
               begin
                 s = TCPSocket.new(ip, port)
                 s.close
@@ -39,6 +39,14 @@ module VagrantPlugins
 
         def read_ssh_info(env)
           return nil if env[:machine].id.nil?
+
+          if env[:machine].config.vm.communicator == :ssh
+            @port = env[:machine].config.ssh.port
+          elsif env[:machine].config.vm.communicator == :winrm
+            @port = env[:machine].config.winrm.port
+          else
+            @port = 22
+          end
 
           cfg = env[:machine].provider_config
           cnx = cfg.vcloud_cnx.driver
