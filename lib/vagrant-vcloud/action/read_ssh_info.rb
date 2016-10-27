@@ -72,12 +72,19 @@ module VagrantPlugins
               'fetching the IP directly from the VM'
             )
             vm_info = cnx.get_vm(env[:machine].id)
+
+            network_name = 'Vagrant-vApp-Net'
+            # Try also vdc_network_name if Vagrant-vApp-Net is not available
+            if not vm_info[:networks].key?(network_name)
+              network_name = cfg.vdc_network_name
+            end
+
             @logger.debug(
               "IP address for #{vm_name}: " \
-              "#{vm_info[:networks]['Vagrant-vApp-Net'][:ip]}"
+              "#{vm_info[:networks][network_name][:ip]}"
             )
 
-            @external_ip = vm_info[:networks]['Vagrant-vApp-Net'][:ip]
+            @external_ip = vm_info[:networks][network_name][:ip]
             @external_port = "#{@port}"
           else
             network_name = nil
